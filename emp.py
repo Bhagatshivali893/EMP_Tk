@@ -8,10 +8,9 @@ from typing import ClassVar
 import numpy as np
 import requests
 import bs4
-#import pandas as pd
+# import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
 
 
 global eid
@@ -67,6 +66,7 @@ def add_emp():
         esalary = aw_ent_salary.get()
         if (eid == "" or ename == "" or esalary == ""):
             showerror("Error in input", "Please fill all the details")
+            clear()
         else:
             if eid > 0:
                 if ((len(ename) >= 2) and (ename.isalpha())):
@@ -79,16 +79,17 @@ def add_emp():
                         showerror("Issue", "Salary should be minimum  Rs.8000")
                         clear()
                 else:
-                    showerror("Issue", "Name should contain only alphabets and length should be more than 2 eg: om")
+                    showerror(
+                        "Issue", "Name should contain only alphabets and length should be more than 2 eg: om")
                     clear()
             else:
                 showerror("Issue", "id should be positive integer")
                 clear()
     except sqlite3.IntegrityError:
-        showerror("Issue","Id exits") 
+        showerror("Issue", "Id exits")
         clear()
     except ValueError:
-        showerror("Issue","Please Enter all details")
+        showerror("Issue", "Please Enter all details")
         clear()
     con.rollback()
 
@@ -130,6 +131,7 @@ def update_emp():
         esalary = aw_ent_salary.get()
         if (eid == "" or ename == "" or esalary == ""):
             showerror("Error in input", "Please fill all the details")
+            clear()
         else:
             if eid > 0:
                 if ((len(ename) >= 2) and (ename.isalpha())):
@@ -139,8 +141,10 @@ def update_emp():
                         if cursor.rowcount == 1:
                             con.commit()
                             showinfo("Success", "Record updated")
+                            clear()
                         else:
                             showerror("Issue", "Id does not exists")
+                            clear()
                     else:
                         showerror("Issue", "Salary should be minimum Rs.8000")
                         clear()
@@ -150,30 +154,42 @@ def update_emp():
                     clear()
             else:
                 showerror("Issue", "id should be positive integer")
+                clear()
     except ValueError:
-        showerror("Issue","Please Enter all details")
+        showerror("Issue", "Please Enter all details")
         clear()
         con.rollback()
     clear()
 
 
 def delete_emp():
-    con = None
     try:
+        con = None
         con = connect("emsproj.db")
         cursor = con.cursor()
-        sql = "delete from emp where eid = '%d'"
-        eid = int(aw_ent_id.get())
-        cursor.execute(sql % (eid))
-        if cursor.rowcount == 1:
-            con.commit()
-            showinfo("Success", "Record Deleted")
-        else:
-            showerror("Issue", " Id Does Not Exists")
+        eid = (aw_ent_id.get())
 
+        if(eid ==""):
+            showerror("Error","Please Fill the details")
+            clear()
+        else:
+            eid = int(eid)
+            sql = "delete from emp where eid = '%d'"
+            cursor.execute(sql % (eid))
+            if cursor.rowcount == 1:
+                con.commit()
+                showinfo("Success", "Record Deleted")
+                clear()
+            else:
+                showinfo("Error", "Id Does not Exists")
+                clear()
+    except ValueError:
+        showerror("Error","Only Positive integer allowed")
+        clear()
     except Exception as e:
         showerror("Issue ", e)
         con.rollback()
+    
     finally:
         aw_ent_id.delete(0, END)
         if con is not None:
